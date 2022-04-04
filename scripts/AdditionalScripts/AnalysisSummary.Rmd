@@ -1,0 +1,99 @@
+---
+title: "Analysis Summary"
+output: html_document
+params:
+  projectdir: "."
+  outputdir: "."
+---
+
+
+***
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+
+## Sample Quality
+```{r, echo=FALSE, results='asis'}
+bar_graph_path = list.files(path = params$outputdir, 
+                            pattern = ".*PercentageReadsMappedBarGraph\\.png", 
+                            recursive = TRUE, 
+                            full.names = TRUE)[1]
+
+cat(sprintf("![](%s){width=450px, height=750px}", bar_graph_path))
+```
+
+
+## Sample Correlation
+```{r, echo=FALSE, results='asis'}
+# Correlation plots
+correlation_plot_paths = list.files(path = params$outputdir, 
+                                    pattern = ".*_CorrelationPlot\\.png", 
+                                    recursive = TRUE, 
+                                    full.names = TRUE)
+for (i in 1:length(correlation_plot_paths)) {
+  cat(sprintf("![](%s){width=400px, height=400px}", correlation_plot_paths[i]))
+}
+
+# Pearson correlation plots
+pearson_correlation_plot_paths = list.files(path = params$outputdir, 
+                                    pattern = ".*PearsonCorrelationPlot\\.png", 
+                                    recursive = TRUE, 
+                                    full.names = TRUE)
+for (i in 1:length(pearson_correlation_plot_paths)) {
+  if (str_detect(pearson_correlation_plot_paths[i], pattern = "TargetsAndControls")) {
+    cat(sprintf("![](%s){width=600px, height=600px}", pearson_correlation_plot_paths[i]))
+  } else {
+    cat(sprintf("![](%s){width=400px, height=400px}", pearson_correlation_plot_paths[i]))
+  }
+}
+
+# tSNE plot
+tsne_plot_paths = list.files(path = params$outputdir, 
+                            pattern = ".*tSNEPlot\\.png", 
+                            recursive = TRUE, 
+                            full.names = TRUE)
+for (i in 1:length(tsne_plot_paths)) {
+  if (str_detect(tsne_plot_paths[i], pattern = "TargetsAndControls")) {
+    cat(sprintf("![](%s){width=600px, height=600px}", tsne_plot_paths[i]))
+  } else {
+    cat(sprintf("![](%s){width=400px, height=400px}", tsne_plot_paths[i]))
+  }
+}
+```
+
+
+## HTSeq Counts
+```{r, echo=FALSE, message=FALSE, comment=""}
+htseq_counts_path = list.files(path = params$outputdir, 
+                            pattern = ".*HTSeqCountsData\\.txt", 
+                            recursive = TRUE, 
+                            full.names = TRUE)[1]
+htseq_counts = read_tsv(htseq_counts_path)
+print(htseq_counts, n = 20)
+```
+
+
+## DESeq Fold Change and Adjusted P-Value
+```{r, echo=FALSE, message=FALSE, comment=""}
+deseq_results_path = list.files(path = params$outputdir, 
+                            pattern = ".*DESeqResults\\.txt", 
+                            recursive = TRUE, 
+                            full.names = TRUE)[1]
+deseq_results = read_tsv(deseq_results_path)
+print(deseq_results, n = 20)
+```
+
+
+## Genome Tracks
+[Click here](https://genome.ucsc.edu/) to view interactive genome tracks (like the example below) for your data.
+
+```{r, echo=FALSE, results='asis'}
+genome_tracks_path = list.files(path = params$projectdir, 
+                                pattern = ".*GenomeTracks\\.png", 
+                                recursive = TRUE, 
+                                full.names = TRUE)[1]
+
+cat(sprintf("![](%s){width=800px}", genome_tracks_path))
+```
+
