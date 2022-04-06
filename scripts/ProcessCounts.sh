@@ -21,7 +21,7 @@ export TMP=/storage/fazal/tmp
 export PATH=/storage/fazal/software/R4.1.2/venv/bin:"${PATH}"
 
 # Define variables for project directories
-PROJECTDIR=/storage/fazal/pipelines/ProcessCounts/scripts
+SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DATADIR="${1}"
 OUTPUTDIR="${PWD}"
 
@@ -32,13 +32,13 @@ filePrefix="${2}"
 # RUN PROCESSCOUNTS PIPELINE
 echo "________________________________________"
 echo "STEP 1: QUALITY CONTROL"
-Rscript --vanilla "${PROJECTDIR}"/1_QualityControl.R "${DATADIR}" "${PROJECTDIR}" "${filePrefix}"
+Rscript --vanilla "${SCRIPTDIR}"/1_QualityControl.R "${DATADIR}" "${SCRIPTDIR}" "${filePrefix}"
 echo "________________________________________"
 echo "STEP 2: DESEQ ANALYSIS"
-Rscript --vanilla "${PROJECTDIR}"/2_DESeqAnalysis.R "${PROJECTDIR}" "${OUTPUTDIR}" "${filePrefix}"
+Rscript --vanilla "${SCRIPTDIR}"/2_DESeqAnalysis.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${filePrefix}"
 echo "________________________________________"
 echo "FINAL STEP: RENDER ANALYSIS SUMMARY"
-Rscript --vanilla "${PROJECTDIR}"/5_RenderAnalysisSummary.R "${PROJECTDIR}" "${OUTPUTDIR}" "${filePrefix}"
+Rscript --vanilla "${SCRIPTDIR}"/5_RenderAnalysisSummary.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${filePrefix}"
 echo "________________________________________"
 echo "DONE"
 echo ""
