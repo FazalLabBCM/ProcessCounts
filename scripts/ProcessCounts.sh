@@ -8,37 +8,23 @@
 #SBATCH --output=%j.ProcessCounts.log
 
 
-set -e
-unset PYTHONPATH
-unset R_LIBS_SITE
-
-# Avoid dumping too much temporary data into system tmp directory
-export TMPDIR=/storage/fazal/tmp
-export TEMP=/storage/fazal/tmp
-export TMP=/storage/fazal/tmp
-
-# Activate environment
-export PATH=/storage/fazal/software/R4.1.2/venv/bin:"${PATH}"
-
 # Define variables for project directories
-SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-DATADIR="${1}"
-OUTPUTDIR="${PWD}"
-
-# Get project file prefix from command arguments
-filePrefix="${2}"
+SCRIPTDIR="${1}"
+DATADIR="${2}"
+OUTPUTDIR="${3}"
+PROJECTNAME="${4}"
 
 
 # RUN PROCESSCOUNTS PIPELINE
 echo "________________________________________"
 echo "STEP 1: QUALITY CONTROL"
-Rscript --vanilla "${SCRIPTDIR}"/1_QualityControl.R "${DATADIR}" "${SCRIPTDIR}" "${filePrefix}"
+Rscript --vanilla "${SCRIPTDIR}"/1_QualityControl.R "${DATADIR}" "${SCRIPTDIR}" "${PROJECTNAME}"
 echo "________________________________________"
 echo "STEP 2: DESEQ ANALYSIS"
-Rscript --vanilla "${SCRIPTDIR}"/2_DESeqAnalysis.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${filePrefix}"
+Rscript --vanilla "${SCRIPTDIR}"/2_DESeqAnalysis.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${PROJECTNAME}"
 echo "________________________________________"
 echo "FINAL STEP: RENDER ANALYSIS SUMMARY"
-Rscript --vanilla "${SCRIPTDIR}"/5_RenderAnalysisSummary.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${filePrefix}"
+Rscript --vanilla "${SCRIPTDIR}"/5_RenderAnalysisSummary.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${PROJECTNAME}"
 echo "________________________________________"
 echo "DONE"
 echo ""
