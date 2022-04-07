@@ -106,7 +106,7 @@ fi
 if [[ -z "${ENVDIR}" ]]
 then
   ENVDIR=/storage/fazal/software/R4.1.2/venv
-  echo "  Environment directory not specified. Defaulting to ${ENVDIR}."
+  # echo "  Environment directory not specified. Defaulting to ${ENVDIR}."
 else
   echo "  Environment directory set to ${ENVDIR}."
 fi
@@ -116,7 +116,7 @@ export PATH="${ENVDIR}"/bin:"${PATH}"
 if [[ -z "${TEMPDIR}" ]]
 then
   TEMPDIR=/storage/fazal/tmp
-  echo "  Temporary directory not specified. Defaulting to ${TEMPDIR}."
+  # echo "  Temporary directory not specified. Defaulting to ${TEMPDIR}."
 else
   echo "  Temporary directory set to ${TEMPDIR}."
 fi

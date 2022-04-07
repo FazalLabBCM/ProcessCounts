@@ -9,13 +9,13 @@ rm(list = ls())
 # Retrieve command line arguments
 args = commandArgs(trailingOnly = TRUE)
 if (interactive()) {
+  scriptdir = "."
   datadir = "./data"
-  projectdir = "."
-  file_prefix = "test"
+  project_name = "test"
 } else {
-  datadir = args[1]
-  projectdir = args[2]
-  file_prefix = args[3]
+  scriptdir = args[1]
+  datadir = args[2]
+  project_name = args[3]
 }
 
 # Import libraries
@@ -35,8 +35,8 @@ data_folder = "DataFiles/"
 figures_folder = "Figures/"
 
 # Files
-genes_file = paste(projectdir, "CommonGeneNames.txt", sep = "/")
-lengths_file = paste(projectdir, "TranscriptLengths.txt", sep = "/")
+genes_file = paste(scriptdir, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")
+lengths_file = paste(scriptdir, "AdditionalFiles", "TranscriptLengths.txt", sep = "/")
 
 # Date
 date = format(Sys.Date(), "%Y%m%d")
@@ -142,9 +142,9 @@ all_log_totals = all_log_final %>%
 #### SAVE DATA TABLES and BAR GRAPH ####
 
 # Save all counts data and log data to files
-write_tsv(all_data, file = paste0(data_folder, paste(date, file_prefix, "HTSeqCountsData.txt", sep = "_")))
-write_tsv(all_log_final, file = paste0(data_folder, paste(date, file_prefix, "STARLogData.txt", sep = "_")))
-write_tsv(all_log_totals, file = paste0(data_folder, paste(date, file_prefix, "STARTotalReadsData.txt", sep = "_")))
+write_tsv(all_data, file = paste0(data_folder, paste(date, project_name, "HTSeqCountsData.txt", sep = "_")))
+write_tsv(all_log_final, file = paste0(data_folder, paste(date, project_name, "STARLogData.txt", sep = "_")))
+write_tsv(all_log_totals, file = paste0(data_folder, paste(date, project_name, "STARTotalReadsData.txt", sep = "_")))
 
 # Plot percentage reads mapped bar graph
 percentage_reads_mapped_bar_graph = ggplot(all_log_final, aes(x = sample, y = percent, fill = reads)) +
@@ -167,11 +167,11 @@ for (i in 1:length(all_log_totals$total)) {
 }
 
 # Save as PDF
-pdf(width = 6, height = 10, file = paste0(figures_folder, paste(date, file_prefix, "PercentageReadsMappedBarGraph.pdf", sep = "_")))
+pdf(width = 6, height = 10, file = paste0(figures_folder, paste(date, project_name, "PercentageReadsMappedBarGraph.pdf", sep = "_")))
 print(percentage_reads_mapped_bar_graph)
 dev.off()
 # Save as PNG
-png(width = 6, height = 10, units = "in", res = 300, file = paste0(figures_folder, paste(date, file_prefix, "PercentageReadsMappedBarGraph.png", sep = "_")))
+png(width = 6, height = 10, units = "in", res = 300, file = paste0(figures_folder, paste(date, project_name, "PercentageReadsMappedBarGraph.png", sep = "_")))
 print(percentage_reads_mapped_bar_graph)
 dev.off()
 
@@ -223,11 +223,11 @@ generate_correlation_plots = function(data, color) {
           annotate(geom="text", x=10, y=10000, label=bquote(italic(r) == .(r))) +
           theme_bw()
         # Save as PDF
-        pdf(file = paste0(figures_folder, paste(date, file_prefix, col_x, col_y, "CorrelationPlot.pdf", sep = "_")))
+        pdf(file = paste0(figures_folder, paste(date, project_name, col_x, col_y, "CorrelationPlot.pdf", sep = "_")))
         print(correlation_plot)
         dev.off()
         # Save as PNG
-        png(width = 5, height = 5, units = "in", res = 300, file = paste0(figures_folder, paste(date, file_prefix, col_x, col_y, "CorrelationPlot.png", sep = "_")))
+        png(width = 5, height = 5, units = "in", res = 300, file = paste0(figures_folder, paste(date, project_name, col_x, col_y, "CorrelationPlot.png", sep = "_")))
         print(correlation_plot)
         dev.off()
       }
