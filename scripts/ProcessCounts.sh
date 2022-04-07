@@ -8,6 +8,8 @@
 #SBATCH --output=%j.ProcessCounts.log
 
 
+set -e
+
 # Define variables for project directories
 SCRIPTDIR="${1}"
 DATADIR="${2}"
@@ -18,7 +20,7 @@ PROJECTNAME="${4}"
 # RUN PROCESSCOUNTS PIPELINE
 echo "________________________________________"
 echo "STEP 1: QUALITY CONTROL"
-Rscript --vanilla "${SCRIPTDIR}"/1_QualityControl.R "${DATADIR}" "${SCRIPTDIR}" "${PROJECTNAME}"
+Rscript --vanilla "${SCRIPTDIR}"/1_QualityControl.R "${SCRIPTDIR}" "${DATADIR}" "${PROJECTNAME}"
 echo "________________________________________"
 echo "STEP 2: DESEQ ANALYSIS"
 Rscript --vanilla "${SCRIPTDIR}"/2_DESeqAnalysis.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${PROJECTNAME}"

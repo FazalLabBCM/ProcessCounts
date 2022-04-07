@@ -9,13 +9,13 @@ rm(list = ls())
 # Retrieve command line arguments
 args = commandArgs(trailingOnly = TRUE)
 if (interactive()) {
-  projectdir = "."
+  scriptdir = "."
   outputdir = "."
-  file_prefix = "test"
+  project_name = "test"
 } else {
-  projectdir = args[1]
+  scriptdir = args[1]
   outputdir = args[2]
-  file_prefix = args[3]
+  project_name = args[3]
 }
 
 # Import libraries
@@ -32,8 +32,8 @@ data_folder = "DataFiles/"
 figures_folder = "Figures/"
 
 # Files
-genes_file = paste(projectdir, "CommonGeneNames.txt", sep = "/")
-lengths_file = paste(projectdir, "TranscriptLengths.txt", sep = "/")
+genes_file = paste(scriptdir, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")
+lengths_file = paste(scriptdir, "AdditionalFiles", "TranscriptLengths.txt", sep = "/")
 
 # Date
 date = format(Sys.Date(), "%Y%m%d")
@@ -150,7 +150,7 @@ genes = read_tsv(genes_file)
 genes_joined = left_join(all_DESeq_data, genes, by = "Ensembl_Gene")
 all_DESeq_data = add_column(all_DESeq_data, "Common_Gene" = genes_joined$Common_Gene, .after = 1)
 # Save all DESeq data to file
-write_tsv(all_DESeq_data, file = paste0(data_folder, paste(date, file_prefix, "DESeqResults.txt", sep = "_")))
+write_tsv(all_DESeq_data, file = paste0(data_folder, paste(date, project_name, "DESeqResults.txt", sep = "_")))
 
 
 #### CREATE PEARSON CORRELATION PLOT ####
@@ -198,12 +198,12 @@ create_and_save_cor_plot = function(cor_mat, targets_or_controls) {
                                "blue", "#00007F","#67001F", "#B2182B", "#D6604D", "#F4A582", "#FDDBC7", 
                                "#FFFFFF", "#D1E5F0", "#92C5DE", "#4393C3", "#2166AC", "#053061"))
   # Save as PDF
-  pdf(file = paste0(figures_folder, paste(date, file_prefix, targets_or_controls, "PearsonCorrelationPlot.pdf", sep = "_")), 
+  pdf(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "PearsonCorrelationPlot.pdf", sep = "_")), 
       width = 7, height = 7)
   create_cor_plot(cor_mat, targets_or_controls, colors)
   dev.off()
   # Save as PNG
-  png(file = paste0(figures_folder, paste(date, file_prefix, targets_or_controls, "PearsonCorrelationPlot.png", sep = "_")), 
+  png(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "PearsonCorrelationPlot.png", sep = "_")), 
       width = 7, height = 7, units = "in", res = 300)
   create_cor_plot(cor_mat, targets_or_controls, colors)
   dev.off()
@@ -259,12 +259,12 @@ create_and_save_tsne_plot = function(counts_tibble, targets_or_controls) {
           plot.margin = unit(c(3,3,1,1), "lines"))
   
   # Save as PDF
-  pdf(file = paste0(figures_folder, paste(date, file_prefix, targets_or_controls, "tSNEPlot.pdf", sep = "_")), 
+  pdf(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "tSNEPlot.pdf", sep = "_")), 
       width = 7, height = 7)
   print(tsne_plot)
   dev.off()
   # Save as PNG
-  png(file = paste0(figures_folder, paste(date, file_prefix, targets_or_controls, "tSNEPlot.png", sep = "_")), 
+  png(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "tSNEPlot.png", sep = "_")), 
       width = 7, height = 7, units = "in", res = 300)
   print(tsne_plot)
   dev.off()
