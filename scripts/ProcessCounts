@@ -16,7 +16,7 @@ do
       echo "ProcessCounts"
       echo ""
       echo "Usage:"
-      echo "  ProcessCounts/scripts/main.sh --option <argument>"
+      echo "  ProcessCounts --option <argument>"
       echo ""
       echo "Options:"
       echo "  -h, --help                show this help message"
