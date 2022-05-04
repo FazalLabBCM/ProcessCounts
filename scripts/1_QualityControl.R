@@ -9,13 +9,15 @@ rm(list = ls())
 # Retrieve command line arguments
 args = commandArgs(trailingOnly = TRUE)
 if (interactive()) {
-  scriptdir = "."
-  datadir = "./data"
-  project_name = "test"
+  SCRIPTDIR = "."
+  DATADIR = "./data"
+  PROJECT_NAME = "test"
+  COMBINE_CONTROLS = "FALSE"
 } else {
-  scriptdir = args[1]
-  datadir = args[2]
-  project_name = args[3]
+  SCRIPTDIR = args[1]
+  DATADIR = args[2]
+  PROJECT_NAME = args[3]
+  COMBINE_CONTROLS = args[4]
 }
 
 # Import libraries
@@ -35,8 +37,8 @@ data_folder = "DataFiles/"
 figures_folder = "Figures/"
 
 # Files
-genes_file = paste(scriptdir, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")
-lengths_file = paste(scriptdir, "AdditionalFiles", "TranscriptLengths.txt", sep = "/")
+genes_file = paste(SCRIPTDIR, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")
+lengths_file = paste(SCRIPTDIR, "AdditionalFiles", "TranscriptLengths.txt", sep = "/")
 
 # Date
 date = format(Sys.Date(), "%Y%m%d")
@@ -47,8 +49,8 @@ locations_conditions = c()
 
 #### COLLECT DATA FOR EACH SAMPLE ####
 
-for (file in list.files(path = datadir, pattern = ".*_aligned\\.txt", recursive = TRUE, full.names = TRUE)) {
-  print(paste0("working with file ", file))
+for (file in list.files(path = DATADIR, pattern = ".*_aligned\\.txt", recursive = TRUE, full.names = TRUE)) {
+  cat("Working with file", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "_aligned\\.txt")[1])
   file_name = str_sub(base_name, start = str_locate(file, pattern = "/[:upper:]+_[^/]+_[:alpha:]+_[:digit:]_aligned\\.txt")[1])
   
@@ -80,20 +82,21 @@ for (file in list.files(path = datadir, pattern = ".*_aligned\\.txt", recursive 
   number = str_sub(number, 2, -2)
   # Join sample name
   sample_name = str_c(location_condition, "-", type, number)
+  cat("  sample name:", sample_name, "\n")
 
   # Read counts file
-  data = read_tsv(file, col_names = c("Ensembl_Gene", sample_name))
+  data = read_tsv(file, col_names = c("Ensembl_Gene", sample_name), show_col_types = FALSE)
   data = dplyr::slice(data, 1:(length(data$Ensembl_Gene) - 5))
   # Join data
   if (!exists("all_data")) {
     all_data = data
   } else {
-    all_data = inner_join(all_data, data)
+    all_data = inner_join(all_data, data, by = "Ensembl_Gene")
   }
   
   # Read STAR final log out file
   log_file = str_c(base_name, "trim_starLog.final.out")
-  log = read_tsv(log_file, col_names = c("type_of_info", "value"))
+  log = read_tsv(log_file, col_names = c("type_of_info", "value"), show_col_types = FALSE)
   # Filter/select important information
   sample = rep(sample_name, 5)
   if (!exists("reads")) {
@@ -130,7 +133,7 @@ for (file in list.files(path = datadir, pattern = ".*_aligned\\.txt", recursive 
 # Order all counts data columns alphabetically
 all_data = select(all_data, "Ensembl_Gene", order(colnames(all_data)[2:length(colnames(all_data))]) + 1)
 # Add common gene names
-genes = read_tsv(genes_file)
+genes = read_tsv(genes_file, show_col_types = FALSE)
 genes_joined = left_join(all_data, genes, by = "Ensembl_Gene")
 all_data = add_column(all_data, "Common_Gene" = genes_joined$Common_Gene, .after = 1)
 # Calculate total number of reads per sample
@@ -142,11 +145,13 @@ all_log_totals = all_log_final %>%
 #### SAVE DATA TABLES and BAR GRAPH ####
 
 # Save all counts data and log data to files
-write_tsv(all_data, file = paste0(data_folder, paste(date, project_name, "HTSeqCountsData.txt", sep = "_")))
-write_tsv(all_log_final, file = paste0(data_folder, paste(date, project_name, "STARLogData.txt", sep = "_")))
-write_tsv(all_log_totals, file = paste0(data_folder, paste(date, project_name, "STARTotalReadsData.txt", sep = "_")))
+cat("Saving data files", "\n")
+write_tsv(all_data, file = paste0(data_folder, paste(date, PROJECT_NAME, "HTSeqCountsData.txt", sep = "_")))
+write_tsv(all_log_final, file = paste0(data_folder, paste(date, PROJECT_NAME, "STARLogData.txt", sep = "_")))
+write_tsv(all_log_totals, file = paste0(data_folder, paste(date, PROJECT_NAME, "STARTotalReadsData.txt", sep = "_")))
 
 # Plot percentage reads mapped bar graph
+cat("Making percentage reads mapped bar graph", "\n")
 percentage_reads_mapped_bar_graph = ggplot(all_log_final, aes(x = sample, y = percent, fill = reads)) +
   geom_bar(stat = "identity") +
   labs(x = "Samples", y = "Percentage (%)", fill = "Reads") +
@@ -167,16 +172,18 @@ for (i in 1:length(all_log_totals$total)) {
 }
 
 # Save as PDF
-pdf(width = 6, height = 10, file = paste0(figures_folder, paste(date, project_name, "PercentageReadsMappedBarGraph.pdf", sep = "_")))
+pdf(width = 6, height = 10, file = paste0(figures_folder, paste(date, PROJECT_NAME, "PercentageReadsMappedBarGraph.pdf", sep = "_")))
 print(percentage_reads_mapped_bar_graph)
 dev.off()
 # Save as PNG
-png(width = 6, height = 10, units = "in", res = 300, file = paste0(figures_folder, paste(date, project_name, "PercentageReadsMappedBarGraph.png", sep = "_")))
+png(width = 6, height = 10, units = "in", res = 300, file = paste0(figures_folder, paste(date, PROJECT_NAME, "PercentageReadsMappedBarGraph.png", sep = "_")))
 print(percentage_reads_mapped_bar_graph)
 dev.off()
 
 
 #### PREPARE DATA FOR DESEQ ANALYSIS ####
+
+cat("Preparing data for DESeq analysis", "\n")
 
 # Separate targets and controls
 targets = select(all_data, matches(".+-T[[:digit:]]$"))
@@ -191,7 +198,11 @@ for (i in 1:length(locations_conditions)) {
   
   # Join location-condition targets with location-condition controls
   location_condition_targets = select(targets, matches(str_c(location_condition, "-T[[:digit:]]$")))
-  location_condition_controls = select(controls, matches(str_c(location_condition, "-C[[:digit:]]$")))
+  if (COMBINE_CONTROLS == "TRUE") {
+    location_condition_controls = controls
+  } else {
+    location_condition_controls = select(controls, matches(str_c(location_condition, "-C[[:digit:]]$")))
+  }
   DESeq_data = add_column(location_condition_controls, location_condition_targets, .before = 1)
   DESeq_data = add_column(DESeq_data, "Ensembl_Gene" = all_data$Ensembl_Gene, .before = 1)
   
@@ -207,6 +218,10 @@ generate_correlation_plots = function(data, color) {
   for (location_condition in locations_conditions) {
     location_condition_data = select(data, contains(location_condition))
     colnames = colnames(location_condition_data)
+    if (length(colnames) < 2) {
+      cat("  not enough replicates to create correlation plot for condition", location_condition, "\n")
+      next
+    }
     for (i in 1:(length(colnames) - 1)) {
       for (j in (i + 1):length(colnames)) {
         col_x = colnames[i]
@@ -223,20 +238,20 @@ generate_correlation_plots = function(data, color) {
           annotate(geom="text", x=10, y=10000, label=bquote(italic(r) == .(r))) +
           theme_bw()
         # Save as PDF
-        pdf(file = paste0(figures_folder, paste(date, project_name, col_x, col_y, "CorrelationPlot.pdf", sep = "_")))
+        pdf(file = paste0(figures_folder, paste(date, PROJECT_NAME, col_x, col_y, "CorrelationPlot.pdf", sep = "_")))
         print(correlation_plot)
         dev.off()
         # Save as PNG
-        png(width = 5, height = 5, units = "in", res = 300, file = paste0(figures_folder, paste(date, project_name, col_x, col_y, "CorrelationPlot.png", sep = "_")))
+        png(width = 5, height = 5, units = "in", res = 300, file = paste0(figures_folder, paste(date, PROJECT_NAME, col_x, col_y, "CorrelationPlot.png", sep = "_")))
         print(correlation_plot)
         dev.off()
       }
     }
   }
 }
-print("Creating correlation plots for targets...")
+cat("Creating correlation plots for targets", "\n")
 generate_correlation_plots(targets, "red4")
-print("Creating correlation plots for controls...")
+cat("Creating correlation plots for controls", "\n")
 generate_correlation_plots(controls, "dodgerblue4")
 
 
