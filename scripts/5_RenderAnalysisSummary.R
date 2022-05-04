@@ -9,13 +9,13 @@ rm(list = ls())
 # Retrieve command line arguments
 args = commandArgs(trailingOnly = TRUE)
 if (interactive()) {
-  scriptdir = "."
-  outputdir = "."
-  project_name = "test"
+  SCRIPTDIR = "."
+  OUTPUTDIR = "."
+  PROJECT_NAME = "test"
 } else {
-  scriptdir = args[1]
-  outputdir = args[2]
-  project_name = args[3]
+  SCRIPTDIR = args[1]
+  OUTPUTDIR = args[2]
+  PROJECT_NAME = args[3]
 }
 
 # Import libraries
@@ -26,9 +26,9 @@ date = format(Sys.Date(), "%Y%m%d")
 
 
 ## RENDER OUTPUT SUMMARY ##
-render_script_path = paste(scriptdir, "AdditionalScripts", "AnalysisSummary.Rmd", sep = "/")
-output_file_path = paste(outputdir, paste(date, project_name, "AnalysisSummary.html", sep = "_"), sep = "/")
+render_script_path = paste(SCRIPTDIR, "AdditionalScripts", "AnalysisSummary.Rmd", sep = "/")
+output_file_path = paste(OUTPUTDIR, paste(date, PROJECT_NAME, "AnalysisSummary.html", sep = "_"), sep = "/")
 render(render_script_path, 
-       params = list(scriptdir = scriptdir, outputdir = outputdir), 
+       params = list(SCRIPTDIR = SCRIPTDIR, OUTPUTDIR = OUTPUTDIR), 
        output_file = output_file_path, 
-       intermediates_dir = outputdir)
+       intermediates_dir = OUTPUTDIR)

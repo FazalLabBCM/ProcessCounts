@@ -6,15 +6,28 @@ unset PYTHONPATH
 unset R_LIBS_SITE
 
 
-# PARSE COMMAND LINE ARGUMENTS
+# SET DEFAULT ARGUMENTS
+SCRIPTDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+PIPELINEDIR=$(dirname "${SCRIPTDIR}")
+source "${PIPELINEDIR}"/CONFIG
+COMBINE_CONTROLS=FALSE
 
+
+# PARSE COMMAND LINE ARGUMENTS
 while [[ $# -gt 0 ]]
 do
   case "${1}" in
     -h|--help)
-      echo ""
+      echo "_____________"
       echo "ProcessCounts"
+      echo "‾‾‾‾‾‾‾‾‾‾‾‾‾"
+      echo "Process FASTQ read counts with DESeq2 (https://github.com/mikelove/DESeq2) to obtain "
+      echo "enrichment values and an analysis summary full of quality-control figures."
       echo ""
+      echo "For help using the ProcessCounts pipeline, visit "
+      echo "https://fazallabbcm.github.io/FazalLabPipelines/."
+      echo ""
+      echo "____________________________________________________________________________________________"
       echo "Usage:"
       echo "  ProcessCounts --option <argument>"
       echo ""
@@ -22,7 +35,6 @@ do
       echo "  -h, --help                show this help message"
       echo ""
       echo "  -d, --data-dir DIR        path to directory containing processed data files"
-      echo "                            (no default)"
       echo ""
       echo "  -o, --output-dir DIR      path to directory for output tables and figures"
       echo "                            (default is your current directory)"
@@ -30,12 +42,9 @@ do
       echo "  -n, --name NAME           name of project to be added to file names of tables and figures"
       echo "                            (default is ProjectName)"
       echo ""
-      echo "  -e, --env-dir DIR         path to directory with conda virtual environment"
-      echo "                            (default is /storage/fazal/software/R4.1.2/venv)"
-      echo ""
-      echo "  -t, --temp-dir DIR        path to directory for temporary files"
-      echo "                            (default is /storage/fazal/tmp)"
-      echo ""
+      echo "  -c, --combine-controls    if control samples for each experimental condition are the same, "
+      echo "                            they can be combined for improved analysis and figures"
+      echo "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"
       exit 0
       ;;
     -d|--data-dir)
@@ -49,8 +58,12 @@ do
       shift
       ;;
     -n|--name)
-      PROJECTNAME="${2}"
+      PROJECT_NAME="${2}"
       shift
+      shift
+      ;;
+    -c|--combine-controls)
+      COMBINE_CONTROLS=TRUE
       shift
       ;;
     -e|--env-dir)
@@ -75,65 +88,51 @@ do
 done
 
 
-# SET UNSPECIFIED ARGUMENTS TO DEFAULTS
-
-SCRIPTDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
+# HANDLE UNSPECIFIED ARGUMENTS
 if [[ -z "${DATADIR}" ]]
 then
   echo "  Processed data directory not specified. Please supply path to processed data directory."
   exit 1
-else
-  echo "  Processed data directory set to ${DATADIR}."
 fi
-
 if [[ -z "${OUTPUTDIR}" ]]
 then
   OUTPUTDIR="${PWD}"
-  echo "  Output directory not specified. Defaulting to ${OUTPUTDIR}."
-else
-  echo "  Output directory set to ${OUTPUTDIR}."
+fi
+if [[ -z "${PROJECT_NAME}" ]]
+then
+  PROJECT_NAME=ProjectName
 fi
 
-if [[ -z "${PROJECTNAME}" ]]
-then
-  PROJECTNAME=ProjectName
-  echo "  Project name not specified. Defaulting to ${PROJECTNAME}."
-else
-  echo "  Project name set to ${PROJECTNAME}."
-fi
 
-if [[ -z "${ENVDIR}" ]]
-then
-  ENVDIR=/storage/fazal/software/R4.1.2/venv
-  # echo "  Environment directory not specified. Defaulting to ${ENVDIR}."
-else
-  echo "  Environment directory set to ${ENVDIR}."
-fi
+# PREPARE ENVIRONMENT
 # Activate environment
 export PATH="${ENVDIR}"/bin:"${PATH}"
-
-if [[ -z "${TEMPDIR}" ]]
-then
-  TEMPDIR=/storage/fazal/tmp
-  # echo "  Temporary directory not specified. Defaulting to ${TEMPDIR}."
-else
-  echo "  Temporary directory set to ${TEMPDIR}."
-fi
 # Avoid dumping too much temporary data into system tmp directory
 export TMPDIR="${TEMPDIR}"
 export TEMP="${TEMPDIR}"
 export TMP="${TEMPDIR}"
 
 
-# CALL PROCESSCOUNTS
+# PRINT SETTINGS FOR USER
+echo ""
+echo "  Processed data directory:  ${DATADIR}"
+echo "  Output directory:          ${OUTPUTDIR}"
+echo "  Project name:              ${PROJECT_NAME}"
+echo "  Combine controls:          ${COMBINE_CONTROLS}"
+#echo "  Environment directory:     ${ENVDIR}"
+#echo "  Temporary directory:       ${TEMPDIR}"
+echo ""
+echo "  Log file will be created in your current directory:  ${PWD}"
+echo ""
 
+
+# START PIPELINE
 while true
 do
   read -p "Do you wish to start the ProcessCounts pipeline? [y/n] " yn
   case $yn in
     [Yy]*)
-      sbatch "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECTNAME}"
+      sbatch "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
       break
       ;;
     [Nn]*)

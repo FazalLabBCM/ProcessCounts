@@ -9,13 +9,15 @@ rm(list = ls())
 # Retrieve command line arguments
 args = commandArgs(trailingOnly = TRUE)
 if (interactive()) {
-  scriptdir = "."
-  outputdir = "."
-  project_name = "test"
+  SCRIPTDIR = "."
+  OUTPUTDIR = "."
+  PROJECT_NAME = "test"
+  COMBINE_CONTROLS = "FALSE"
 } else {
-  scriptdir = args[1]
-  outputdir = args[2]
-  project_name = args[3]
+  SCRIPTDIR = args[1]
+  OUTPUTDIR = args[2]
+  PROJECT_NAME = args[3]
+  COMBINE_CONTROLS = args[4]
 }
 
 # Import libraries
@@ -32,8 +34,8 @@ data_folder = "DataFiles/"
 figures_folder = "Figures/"
 
 # Files
-genes_file = paste(scriptdir, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")
-lengths_file = paste(scriptdir, "AdditionalFiles", "TranscriptLengths.txt", sep = "/")
+genes_file = paste(SCRIPTDIR, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")
+lengths_file = paste(SCRIPTDIR, "AdditionalFiles", "TranscriptLengths.txt", sep = "/")
 
 # Date
 date = format(Sys.Date(), "%Y%m%d")
@@ -47,21 +49,24 @@ deseq_prefix = "DESeq2"
 target = "target"
 control = "control"
 
-for (file in list.files(path = outputdir, pattern = "^[[:upper:]]+-.*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
-  print(paste0("working with file ", file))
+target_pattern = ".+-T[[:digit:]]$"
+control_pattern = ".+-C[[:digit:]]$"
+
+for (file in list.files(path = OUTPUTDIR, pattern = "^[[:upper:]]+-.*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
+  cat("working with file ", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "C\\.txt")[1])
   abbreviation = str_sub(base_name, 
                          start = str_locate(base_name, pattern = "/[:upper:]+-")[1] + 1, 
                          end = str_locate(base_name, pattern = "-[[:digit:]]+C$")[1] - 1)
   
   # Read data file
-  data = read_tsv(file)
+  data = read_tsv(file, show_col_types = FALSE)
   gene = data$Ensembl_Gene
   data = select(data, -Ensembl_Gene)
   
   # Define column types (condition is either "target" or "control")
-  num_targets = ncol(select(data, matches(".+-T[[:digit:]]$")))
-  num_controls = ncol(select(data, matches(".+-C[[:digit:]]$")))
+  num_targets = ncol(select(data, matches(target_pattern)))
+  num_controls = ncol(select(data, matches(control_pattern)))
   condition = factor(c(rep(target, num_targets), rep(control, num_controls)))
   colTypes = tibble(condition)
   
@@ -77,37 +82,39 @@ for (file in list.files(path = outputdir, pattern = "^[[:upper:]]+-.*[[:digit:]]
     add_column("name" = names(sizeFactors(DESeq_data_set)), .before = 1)
   # Add targets counts and size factors to tibbles
   if (!exists("targets_counts")) {
-    targets_counts = select(counts, matches(".+-T[[:digit:]]$"))
+    targets_counts = select(counts, matches(target_pattern))
   } else {
-    targets_counts = add_column(targets_counts, select(counts, matches(".+-T[[:digit:]]$")))
+    targets_counts = add_column(targets_counts, select(counts, matches(target_pattern)))
   }
   new_targets_sizeFactors = sizeFactors %>%
-    filter(grepl("-T", name)) %>%
+    filter(grepl(target_pattern, name)) %>%
     pull(value)
   names(new_targets_sizeFactors) = sizeFactors %>%
-    filter(grepl("-T", name)) %>%
+    filter(grepl(target_pattern, name)) %>%
     pull(name)
   if (!exists("targets_sizeFactors")) {
     targets_sizeFactors = new_targets_sizeFactors
   } else {
     targets_sizeFactors = c(targets_sizeFactors, new_targets_sizeFactors)
   }
-  # Add controls counts and size factors to tibbles
-  if (!exists("controls_counts")) {
-    controls_counts = select(counts, matches(".+-C[[:digit:]]$"))
-  } else {
-    controls_counts = add_column(controls_counts, select(counts, matches(".+-C[[:digit:]]$")))
-  }
-  new_controls_sizeFactors = sizeFactors %>%
-    filter(grepl("-C", name)) %>%
-    pull(value)
-  names(new_controls_sizeFactors) = sizeFactors %>%
-    filter(grepl("-C", name)) %>%
-    pull(name)
-  if (!exists("controls_sizeFactors")) {
-    controls_sizeFactors = new_controls_sizeFactors
-  } else {
-    controls_sizeFactors = c(controls_sizeFactors, new_controls_sizeFactors)
+  if (COMBINE_CONTROLS == "FALSE") {
+    # Add controls counts and size factors to tibbles
+    if (!exists("controls_counts")) {
+      controls_counts = select(counts, matches(control_pattern))
+    } else {
+      controls_counts = add_column(controls_counts, select(counts, matches(control_pattern)))
+    }
+    new_controls_sizeFactors = sizeFactors %>%
+      filter(grepl(control_pattern, name)) %>%
+      pull(value)
+    names(new_controls_sizeFactors) = sizeFactors %>%
+      filter(grepl(control_pattern, name)) %>%
+      pull(name)
+    if (!exists("controls_sizeFactors")) {
+      controls_sizeFactors = new_controls_sizeFactors
+    } else {
+      controls_sizeFactors = c(controls_sizeFactors, new_controls_sizeFactors)
+    }
   }
   
   # Save DESeq results
@@ -121,16 +128,26 @@ for (file in list.files(path = outputdir, pattern = "^[[:upper:]]+-.*[[:digit:]]
   write_tsv(result_data, file = paste0(data_folder, "DESeq/", paste(deseq_prefix, file_name, sep = "_"), ".txt"))
 }
 
+if (COMBINE_CONTROLS == "TRUE") {
+  controls_counts = select(counts, matches(control_pattern))
+  controls_sizeFactors = sizeFactors %>%	
+    filter(grepl("-C", name)) %>%	
+    pull(value)	
+  names(controls_sizeFactors) = sizeFactors %>%	
+    filter(grepl("-C", name)) %>%	
+    pull(name)
+}
+
 
 #### MERGE AND SAVE ALL RESULTS ####
 
 # Merge DESeq data into one data table
-for (file in list.files(path = outputdir, pattern = "DESeq2_[[:upper:]]+-.*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
-  print(paste0("working with file ", file))
+for (file in list.files(path = OUTPUTDIR, pattern = "DESeq2_[[:upper:]]+-.*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
+  cat("working with file ", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "C\\.txt")[1])
   
   # Read file
-  DESeq_data = read_tsv(file)
+  DESeq_data = read_tsv(file, show_col_types = FALSE)
   if (!exists("all_DESeq_data")) {
     all_DESeq_data = select(DESeq_data, Ensembl_Gene)
   }
@@ -146,11 +163,11 @@ for (file in list.files(path = outputdir, pattern = "DESeq2_[[:upper:]]+-.*[[:di
   all_DESeq_data = inner_join(all_DESeq_data, DESeq_data)
 }
 # Add common gene names
-genes = read_tsv(genes_file)
+genes = read_tsv(genes_file, show_col_types = FALSE)
 genes_joined = left_join(all_DESeq_data, genes, by = "Ensembl_Gene")
 all_DESeq_data = add_column(all_DESeq_data, "Common_Gene" = genes_joined$Common_Gene, .after = 1)
 # Save all DESeq data to file
-write_tsv(all_DESeq_data, file = paste0(data_folder, paste(date, project_name, "DESeqResults.txt", sep = "_")))
+write_tsv(all_DESeq_data, file = paste0(data_folder, paste(date, PROJECT_NAME, "DESeqResults.txt", sep = "_")))
 
 
 #### CREATE PEARSON CORRELATION PLOT ####
@@ -198,12 +215,12 @@ create_and_save_cor_plot = function(cor_mat, targets_or_controls) {
                                "blue", "#00007F","#67001F", "#B2182B", "#D6604D", "#F4A582", "#FDDBC7", 
                                "#FFFFFF", "#D1E5F0", "#92C5DE", "#4393C3", "#2166AC", "#053061"))
   # Save as PDF
-  pdf(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "PearsonCorrelationPlot.pdf", sep = "_")), 
+  pdf(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "PearsonCorrelationPlot.pdf", sep = "_")), 
       width = 7, height = 7)
   create_cor_plot(cor_mat, targets_or_controls, colors)
   dev.off()
   # Save as PNG
-  png(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "PearsonCorrelationPlot.png", sep = "_")), 
+  png(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "PearsonCorrelationPlot.png", sep = "_")), 
       width = 7, height = 7, units = "in", res = 300)
   create_cor_plot(cor_mat, targets_or_controls, colors)
   dev.off()
@@ -259,12 +276,12 @@ create_and_save_tsne_plot = function(counts_tibble, targets_or_controls) {
           plot.margin = unit(c(3,3,1,1), "lines"))
   
   # Save as PDF
-  pdf(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "tSNEPlot.pdf", sep = "_")), 
+  pdf(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "tSNEPlot.pdf", sep = "_")), 
       width = 7, height = 7)
   print(tsne_plot)
   dev.off()
   # Save as PNG
-  png(file = paste0(figures_folder, paste(date, project_name, targets_or_controls, "tSNEPlot.png", sep = "_")), 
+  png(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "tSNEPlot.png", sep = "_")), 
       width = 7, height = 7, units = "in", res = 300)
   print(tsne_plot)
   dev.off()
