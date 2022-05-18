@@ -52,11 +52,11 @@ control = "control"
 target_pattern = ".+-T[[:digit:]]$"
 control_pattern = ".+-C[[:digit:]]$"
 
-for (file in list.files(path = OUTPUTDIR, pattern = "^[[:upper:]]+-.*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
+for (file in list.files(path = OUTPUTDIR, pattern = "^[^/_]+-[^/_]*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
   cat("working with file ", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "C\\.txt")[1])
   abbreviation = str_sub(base_name, 
-                         start = str_locate(base_name, pattern = "/[:upper:]+-")[1] + 1, 
+                         start = str_locate(base_name, pattern = "/[^/_]+-")[1] + 1, 
                          end = str_locate(base_name, pattern = "-[[:digit:]]+C$")[1] - 1)
   
   # Read data file
@@ -125,7 +125,7 @@ for (file in list.files(path = OUTPUTDIR, pattern = "^[[:upper:]]+-.*[[:digit:]]
                            "pValueAdjusted" = DESeq_result$padj)
   result_data = add_column(result_data, "Ensembl_Gene" = gene, .before = 1)
   file_name = str_sub(base_name, start = str_locate(base_name, pattern = abbreviation)[1])
-  write_tsv(result_data, file = paste0(data_folder, "DESeq/", paste(deseq_prefix, file_name, sep = "_"), ".txt"))
+  write_tsv(result_data, file = paste0(data_folder, "DESeq/", paste(file_name, deseq_prefix, sep = "_"), ".txt"))
 }
 
 if (COMBINE_CONTROLS == "TRUE") {
@@ -142,9 +142,10 @@ if (COMBINE_CONTROLS == "TRUE") {
 #### MERGE AND SAVE ALL RESULTS ####
 
 # Merge DESeq data into one data table
-for (file in list.files(path = OUTPUTDIR, pattern = "DESeq2_[[:upper:]]+-.*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
+for (file in list.files(path = OUTPUTDIR, pattern = "[^/_]+-[^/_]*[[:digit:]]+C_DESeq2\\.txt", recursive = TRUE, full.names = TRUE)) {
   cat("working with file ", file, "\n")
-  base_name = str_sub(file, end = str_locate(file, pattern = "C\\.txt")[1])
+  base_name = str_sub(file, end = str_locate(file, pattern = "C_DESeq2\\.txt")[1])
+  print(base_name)
   
   # Read file
   DESeq_data = read_tsv(file, show_col_types = FALSE)
@@ -154,7 +155,7 @@ for (file in list.files(path = OUTPUTDIR, pattern = "DESeq2_[[:upper:]]+-.*[[:di
   
   # Select and rename columns
   DESeq_data = select(DESeq_data, c(Ensembl_Gene, log2FoldChange, pValueAdjusted))
-  name = str_extract(base_name, pattern = "[:upper:]+-.*[:digit:]+C")
+  name = str_extract(base_name, pattern = "[^/_]+-[^/_]*[:digit:]+C")
   colNameFC = str_c(name, "-FC")
   colNameP = str_c(name, "-P")
   DESeq_data = setNames(DESeq_data, c("Ensembl_Gene", colNameFC, colNameP))
