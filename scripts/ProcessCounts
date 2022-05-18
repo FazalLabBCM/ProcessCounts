@@ -42,8 +42,11 @@ do
       echo "  -n, --name NAME           name of project to be added to file names of tables and figures"
       echo "                            (default is ProjectName)"
       echo ""
-      echo "  -c, --combine-controls    if control samples for each experimental condition are the same, "
+      echo "  -c, --combine-controls    if control samples for each experimental condition are the same,"
       echo "                            they can be combined for improved analysis and figures"
+      echo ""
+      echo "  -i, --interactive         run the pipeline interactively instead of submitting a batch job"
+      echo "                            (make sure to switch to an interactive node)"
       echo "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"
       exit 0
       ;;
@@ -64,6 +67,10 @@ do
       ;;
     -c|--combine-controls)
       COMBINE_CONTROLS=TRUE
+      shift
+      ;;
+    -i|--interactive)
+      INTERACTIVE=TRUE
       shift
       ;;
     -e|--env-dir)
@@ -132,7 +139,14 @@ do
   read -p "Do you wish to start the ProcessCounts pipeline? [y/n] " yn
   case $yn in
     [Yy]*)
-      sbatch "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
+      if [[ "${INTERACTIVE}" == TRUE ]]
+      then
+        # Run pipeline interactively
+        "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
+      else
+        # Submit batch job
+        sbatch "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
+      fi
       break
       ;;
     [Nn]*)

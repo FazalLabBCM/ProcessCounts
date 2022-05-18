@@ -52,16 +52,16 @@ locations_conditions = c()
 for (file in list.files(path = DATADIR, pattern = ".*_aligned\\.txt", recursive = TRUE, full.names = TRUE)) {
   cat("Working with file", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "_aligned\\.txt")[1])
-  file_name = str_sub(base_name, start = str_locate(file, pattern = "/[:upper:]+_[^/]+_[:alpha:]+_[:digit:]_aligned\\.txt")[1])
+  file_name = str_sub(base_name, start = str_locate(file, pattern = "/[^/_]+_[^/_]+_[:alpha:]+_[:digit:]_aligned\\.txt")[1])
   
   # Extract sample name (location + experimental condition + target/control + number)
   # Extract location
-  location = str_extract(file_name, pattern = "/[:upper:]+_")
+  location = str_extract(file_name, pattern = "/[^/_]+_")
   location = str_sub(location, 2, -2)
   # Extract experimental condition
   condition_start = str_locate(file_name, pattern = location)[2] + 2
   condition = str_sub(file_name, start = condition_start, end = -1)
-  condition = str_sub(condition, end = str_locate(condition, pattern = "^[:alnum:]+")[2])
+  condition = str_sub(condition, end = str_locate(condition, pattern = "^[^/_]+")[2])
   # Join location and condition
   if (condition == "none") {
     location_condition = location
