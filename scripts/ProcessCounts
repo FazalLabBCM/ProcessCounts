@@ -129,7 +129,12 @@ echo "  Combine controls:          ${COMBINE_CONTROLS}"
 #echo "  Environment directory:     ${ENVDIR}"
 #echo "  Temporary directory:       ${TEMPDIR}"
 echo ""
-echo "  Log file will be created in your current directory:  ${PWD}"
+if [[ "${INTERACTIVE}" == TRUE ]]
+then
+  echo "  Interactive mode enabled; log will display in the terminal."
+else
+  echo "  Log file will be created in your output directory."
+fi
 echo ""
 
 
@@ -145,6 +150,7 @@ do
         "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
       else
         # Submit batch job
+        sbatch --job-name=ProcessCounts --output="${OUTPUTDIR}"%j.%x.log \
         sbatch "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
       fi
       break

@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 
-#SBATCH -n 1                        # Number of cores (-n)
-#SBATCH -N 1                        # Ensure that all cores are on one Node (-N)
-#SBATCH -t 0-12:00                  # Runtime in D-HH:MM, minimum of 10 minutes
-#SBATCH --mem=16G                   # Memory pool for all cores (see also --mem-per-cpu)
-#SBATCH --job-name=ProcessCounts    # Short name for the job
-#SBATCH --output=%j.ProcessCounts.log
-
+#SBATCH -n 1                        # Number of cores
+#SBATCH -N 1                        # Number of nodes
+#SBATCH -t 0-08:00                  # Runtime in D-HH:MM
+#SBATCH --mem=8G                    # Memory pool for all cores
 
 set -e
 
