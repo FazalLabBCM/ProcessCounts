@@ -30,7 +30,7 @@ on your local computing environment.
    > experiment at the same time. If your aligned data files are separated into subfolders, 
    > just supply the path to the folder containing the subfolders.
 
-3. Make sure that the raw data and processed data file paths are correct. Then enter "y" to 
+3. Make sure that the processed data and output file paths are correct. Then enter "y" to 
    start the pipeline.
 
 
