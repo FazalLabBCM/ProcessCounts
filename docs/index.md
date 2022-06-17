@@ -12,6 +12,9 @@ of Medicine's MHGCP cluster, follow this link to
 [download and setup the pipeline](https://fazallabbcm.github.io/ProcessCounts/DownloadAndSetup) 
 on your local computing environment.
 
+Make sure you run the [TrimMapCount](https://fazallabbcm.github.io/TrimMapCount) pipeline first.
+Once it has finished successfully, you are ready to run the ProcessCounts pipeline.
+
 
 ## Running the Pipeline
 
