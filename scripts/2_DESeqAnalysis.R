@@ -30,8 +30,8 @@ library(Rtsne)
 #### DEFINE VARIABLES ####
 
 # Folders
-data_folder = "DataFiles/"
-figures_folder = "Figures/"
+data_folder = paste(OUTPUTDIR, "DataFiles/", sep = "/")
+figures_folder = paste(OUTPUTDIR, "Figures/", sep = "/")
 
 # Files
 genes_file = paste(SCRIPTDIR, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")

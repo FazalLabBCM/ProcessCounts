@@ -18,7 +18,7 @@ COMBINE_CONTROLS="${5}"
 # RUN PROCESSCOUNTS PIPELINE
 echo "________________________________________"
 echo "STEP 1: QUALITY CONTROL"
-Rscript --vanilla "${SCRIPTDIR}"/1_QualityControl.R "${SCRIPTDIR}" "${DATADIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
+Rscript --vanilla "${SCRIPTDIR}"/1_QualityControl.R "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
 echo "________________________________________"
 echo "STEP 2: DESEQ ANALYSIS"
 Rscript --vanilla "${SCRIPTDIR}"/2_DESeqAnalysis.R "${SCRIPTDIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"

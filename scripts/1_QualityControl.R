@@ -11,13 +11,15 @@ args = commandArgs(trailingOnly = TRUE)
 if (interactive()) {
   SCRIPTDIR = "."
   DATADIR = "./data"
+  OUTPUTDIR = "."
   PROJECT_NAME = "test"
   COMBINE_CONTROLS = "FALSE"
 } else {
   SCRIPTDIR = args[1]
   DATADIR = args[2]
-  PROJECT_NAME = args[3]
-  COMBINE_CONTROLS = args[4]
+  OUTPUTDIR = args[3]
+  PROJECT_NAME = args[4]
+  COMBINE_CONTROLS = args[5]
 }
 
 # Import libraries
@@ -29,12 +31,14 @@ library(grid)
 #### DEFINE VARIABLES ####
 
 # Create folders for data and figures
-dir.create("DataFiles")
-dir.create("Figures")
+data_folder = paste(OUTPUTDIR, "DataFiles", sep = "/")
+figures_folder = paste(OUTPUTDIR, "Figures", sep = "/")
+dir.create(data_folder)
+dir.create(figures_folder)
 
 # Folders
-data_folder = "DataFiles/"
-figures_folder = "Figures/"
+data_folder = paste0(data_folder, "/")
+figures_folder = paste0(figures_folder, "/")
 
 # Files
 genes_file = paste(SCRIPTDIR, "AdditionalFiles", "CommonGeneNames.txt", sep = "/")
@@ -190,8 +194,9 @@ targets = select(all_data, matches(".+-T[[:digit:]]$"))
 controls = select(all_data, matches(".+-C[[:digit:]]$"))
 
 # Create new folder for DESeq data files
-dir.create("DataFiles/DESeq")
-deseq_folder = "DESeq/"
+deseq_folder = paste0(data_folder, "DESeq")
+dir.create(deseq_folder)
+deseq_folder = paste0(deseq_folder, "/")
 
 for (i in 1:length(locations_conditions)) {
   location_condition = locations_conditions[i]
@@ -208,7 +213,7 @@ for (i in 1:length(locations_conditions)) {
   
   # Save file
   file_name = str_c(location_condition, "-", ncol(location_condition_controls), "C")
-  write_tsv(DESeq_data, file = paste0(data_folder, deseq_folder, file_name, ".txt"))
+  write_tsv(DESeq_data, file = paste0(deseq_folder, file_name, ".txt"))
 }
 
 
