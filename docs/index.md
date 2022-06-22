@@ -43,8 +43,7 @@ You can check the log file in your output folder to see the progress of your job
 If you encounter any errors, see our 
 [troubleshooting](https://fazallabbcm.github.io/ProcessCounts/Troubleshooting) page for help.
 
-Once [ProcessCounts](https://fazallabbcm.github.io/ProcessCounts) has finished, open the 
-Analysis Summary HTML file and look for the following things:
+Once ProcessCounts has finished, open the Analysis Summary HTML file and look for the following things:
 
   1. Percentage of reads mapped uniquely is greater than 75% for each sample (remove any 
      samples that do not meet this criterion from future analyses) 
