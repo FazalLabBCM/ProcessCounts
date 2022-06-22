@@ -55,7 +55,7 @@ Once ProcessCounts has finished, open the Analysis Summary HTML file and look fo
   3. Examine the other plots, looking for correlation between replicates as well as differences 
      between experimental conditions
 
-> **Additional Analyses:** If you wish to compare your results to the results of another experiment, 
+> Additional Analyses: If you wish to compare your results to the results of another experiment, 
 > make a volcano plot or an ROC curve. (Code for a generic volcano plot and ROC curve can be 
 > found [here]().)
 
