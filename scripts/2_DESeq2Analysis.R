@@ -21,10 +21,11 @@ if (interactive()) {
 }
 
 # Import libraries
-library(tidyverse)
-library(DESeq2)
-library(corrplot)
-library(Rtsne)
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(ggrepel))
+suppressPackageStartupMessages(library(DESeq2))
+suppressPackageStartupMessages(library(corrplot))
+suppressPackageStartupMessages(library(Rtsne))
 
 
 #### DEFINE VARIABLES ####
@@ -53,7 +54,7 @@ target_pattern = ".+-T[[:digit:]]$"
 control_pattern = ".+-C[[:digit:]]$"
 
 for (file in list.files(path = OUTPUTDIR, pattern = "^[^/_]+-[^/_]*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
-  cat("working with file ", file, "\n")
+  cat("Working with file ", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "C\\.txt")[1])
   abbreviation = str_sub(base_name, 
                          start = str_locate(base_name, pattern = "/[^/_]+-")[1] + 1, 
@@ -125,7 +126,7 @@ for (file in list.files(path = OUTPUTDIR, pattern = "^[^/_]+-[^/_]*[[:digit:]]+C
                            "pValueAdjusted" = DESeq_result$padj)
   result_data = add_column(result_data, "Ensembl_Gene" = gene, .before = 1)
   file_name = str_sub(base_name, start = str_locate(base_name, pattern = abbreviation)[1])
-  write_tsv(result_data, file = paste0(data_folder, "DESeq/", paste(file_name, deseq_prefix, sep = "_"), ".txt"))
+  write_tsv(result_data, file = paste0(data_folder, "DESeq2/", paste(file_name, deseq_prefix, sep = "_"), ".txt"))
 }
 
 if (COMBINE_CONTROLS == "TRUE") {
@@ -142,10 +143,10 @@ if (COMBINE_CONTROLS == "TRUE") {
 #### MERGE AND SAVE ALL RESULTS ####
 
 # Merge DESeq data into one data table
+cat("Merging all DESeq2 results", "\n")
 for (file in list.files(path = OUTPUTDIR, pattern = "[^/_]+-[^/_]*[[:digit:]]+C_DESeq2\\.txt", recursive = TRUE, full.names = TRUE)) {
-  cat("working with file ", file, "\n")
+  cat("  merging file ", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "C_DESeq2\\.txt")[1])
-  print(base_name)
   
   # Read file
   DESeq_data = read_tsv(file, show_col_types = FALSE)
@@ -161,14 +162,14 @@ for (file in list.files(path = OUTPUTDIR, pattern = "[^/_]+-[^/_]*[[:digit:]]+C_
   DESeq_data = setNames(DESeq_data, c("Ensembl_Gene", colNameFC, colNameP))
   
   # Join data
-  all_DESeq_data = inner_join(all_DESeq_data, DESeq_data)
+  all_DESeq_data = inner_join(all_DESeq_data, DESeq_data, by = "Ensembl_Gene")
 }
 # Add common gene names
 genes = read_tsv(genes_file, show_col_types = FALSE)
 genes_joined = left_join(all_DESeq_data, genes, by = "Ensembl_Gene")
 all_DESeq_data = add_column(all_DESeq_data, "Common_Gene" = genes_joined$Common_Gene, .after = 1)
 # Save all DESeq data to file
-write_tsv(all_DESeq_data, file = paste0(data_folder, paste(date, PROJECT_NAME, "DESeqResults.txt", sep = "_")))
+write_tsv(all_DESeq_data, file = paste0(data_folder, paste(date, PROJECT_NAME, "DESeq2Results.txt", sep = "_")))
 
 
 #### CREATE PEARSON CORRELATION PLOT ####
@@ -201,15 +202,16 @@ create_cor_plot = function(cor_mat, targets_or_controls, colors) {
       num_squares = 1
     }
   }
+  text_label_size = 28.8 / ncol(cor_mat)
   corrplot(cor_mat, 
            method="circle", 
            order = "hclust", 
            col.lim = c(0, 1), 
+           tl.cex = ifelse(text_label_size < 1, text_label_size, 1),
            tl.col = "black", 
            hclust.method = "centroid", 
            addrect = num_squares, 
-           col = colors(40))
-}
+           col = colors(40))}
 
 create_and_save_cor_plot = function(cor_mat, targets_or_controls) {
   colors = colorRampPalette(c("#7F0000", "red", "#FF7F00", "yellow", "#7FFF7F", "cyan", "#007FFF", 
@@ -228,12 +230,15 @@ create_and_save_cor_plot = function(cor_mat, targets_or_controls) {
 }
 
 # Targets
+cat("Creating Pearson correlation plot for targets", "\n")
 targets_cor_mat = prepare_cor_mat(targets_counts, targets_sizeFactors)
 create_and_save_cor_plot(targets_cor_mat, "Targets")
 # Controls
+cat("Creating Pearson correlation plot for controls", "\n")
 controls_cor_mat = prepare_cor_mat(controls_counts, controls_sizeFactors)
 create_and_save_cor_plot(controls_cor_mat, "Controls")
 # Targets and controls
+cat("Creating Pearson correlation plot for targets and controls", "\n")
 targets_and_controls_counts = cbind(targets_counts, controls_counts)
 targets_and_controls_sizeFactors = c(targets_sizeFactors, controls_sizeFactors)
 targets_and_controls_cor_mat = prepare_cor_mat(targets_and_controls_counts, targets_and_controls_sizeFactors)
@@ -265,9 +270,10 @@ create_and_save_tsne_plot = function(counts_tibble, targets_or_controls) {
     mutate(color = ifelse(grepl("-T[[:digit:]]$", combined_tsne$name), yes = "Target", no = "Control"))
   
   # Create tSNE plot
+  text_size = 100 / ncol(counts_tibble)
   tsne_plot = ggplot(data = combined_tsne, aes(x = SNE_1, y = SNE_2, label = name)) + 
     geom_point(size=5, alpha = 0.3, aes(color = factor(color))) + 
-    geom_text(size = 4)  +
+    geom_text_repel(size = ifelse(text_size < 4, text_size, 4), point.padding = -10, force = 0.1, force_pull = 100, max.overlaps = 20)  +
     theme_bw() +
     coord_cartesian(clip = "off") +
     scale_color_manual(guide = "none", values = c("Target" = "red4", "Control" = "dodgerblue4")) +
@@ -289,10 +295,13 @@ create_and_save_tsne_plot = function(counts_tibble, targets_or_controls) {
 }
 
 # Targets
+cat("Creating tSNE plot for targets", "\n")
 create_and_save_tsne_plot(targets_counts, "Targets")
 # Controls
+cat("Creating tSNE plot for controls", "\n")
 create_and_save_tsne_plot(controls_counts, "Controls")
 # Targets and controls
+cat("Creating tSNE plot for targets and controls", "\n")
 create_and_save_tsne_plot(targets_and_controls_counts, "TargetsAndControls")
 
 
