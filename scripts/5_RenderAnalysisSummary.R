@@ -19,7 +19,7 @@ if (interactive()) {
 }
 
 # Import libraries
-library(rmarkdown)
+suppressPackageStartupMessages(library(rmarkdown))
 
 # Date
 date = format(Sys.Date(), "%Y%m%d")
@@ -28,7 +28,7 @@ date = format(Sys.Date(), "%Y%m%d")
 ## RENDER OUTPUT SUMMARY ##
 render_script_path = paste(SCRIPTDIR, "AdditionalScripts", "AnalysisSummary.Rmd", sep = "/")
 output_file_path = paste(OUTPUTDIR, paste(date, PROJECT_NAME, "AnalysisSummary.html", sep = "_"), sep = "/")
-render(render_script_path, 
-       params = list(SCRIPTDIR = SCRIPTDIR, OUTPUTDIR = OUTPUTDIR), 
-       output_file = output_file_path, 
-       intermediates_dir = OUTPUTDIR)
+suppressWarnings(render(render_script_path, 
+                        params = list(SCRIPTDIR = SCRIPTDIR, OUTPUTDIR = OUTPUTDIR), 
+                        output_file = output_file_path, 
+                        intermediates_dir = OUTPUTDIR))
