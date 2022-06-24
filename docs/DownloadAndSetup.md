@@ -21,6 +21,8 @@ conda create \
   r-gridgraphics \
   r-rtsne \
   r-corrplot \
+  r-ggrepel \
+  r-proc \
   -c conda-forge \
   -c bioconda \
   -c r
