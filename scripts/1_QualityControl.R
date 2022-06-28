@@ -70,7 +70,7 @@ if (file.exists(file_name_HTSeqCounts) &
 } else {
   cat("Collecting and combining data", "\n")
   for (file in list.files(path = DATADIR, pattern = ".*_aligned\\.txt", recursive = TRUE, full.names = TRUE)) {
-    cat("Working with file", file, "\n")
+    cat("  working with file", file, "\n")
     base_name = str_sub(file, end = str_locate(file, pattern = "_aligned\\.txt")[1])
     file_name = str_sub(base_name, start = str_locate(file, pattern = "/[^/_]+_[^/_]+_[:alpha:]+_[:digit:]_aligned\\.txt")[1])
     
@@ -102,7 +102,7 @@ if (file.exists(file_name_HTSeqCounts) &
     number = str_sub(number, 2, -2)
     # Join sample name
     sample_name = str_c(location_condition, "-", type, number)
-    cat("  sample name:", sample_name, "\n")
+    cat("    sample name:", sample_name, "\n")
     
     # Read counts file
     data = suppressWarnings(read_tsv(file, col_names = c("Ensembl_Gene", sample_name), show_col_types = FALSE))
@@ -209,11 +209,11 @@ if (file.exists(file_name_BarGraphPDF) &
   # Save as PDF
   pdf(width = 6, height = 10, file = file_name_BarGraphPDF)
   print(percentage_reads_mapped_bar_graph)
-  dev.off()
+  invisible(dev.off())
   # Save as PNG
   png(width = 6, height = 10, units = "in", res = 300, file = file_name_BarGraphPNG)
   print(percentage_reads_mapped_bar_graph)
-  dev.off()
+  invisible(dev.off())
 }
 
 
@@ -289,11 +289,11 @@ generate_correlation_plots = function(data, color) {
           # Save as PDF
           pdf(file = file_name_CorrelationPlotPDF)
           print(correlation_plot)
-          dev.off()
+          invisible(dev.off())
           # Save as PNG
           png(width = 5, height = 5, units = "in", res = 300, file = file_name_CorrelationPlotPNG)
           print(correlation_plot)
-          dev.off()
+          invisible(dev.off())
         }
       }
     }
