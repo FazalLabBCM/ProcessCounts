@@ -221,12 +221,12 @@ create_and_save_cor_plot = function(cor_mat, targets_or_controls) {
   pdf(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "PearsonCorrelationPlot.pdf", sep = "_")), 
       width = 7, height = 7)
   create_cor_plot(cor_mat, targets_or_controls, colors)
-  dev.off()
+  invisible(dev.off())
   # Save as PNG
   png(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "PearsonCorrelationPlot.png", sep = "_")), 
       width = 7, height = 7, units = "in", res = 300)
   create_cor_plot(cor_mat, targets_or_controls, colors)
-  dev.off()
+  invisible(dev.off())
 }
 
 # Targets
@@ -286,12 +286,12 @@ create_and_save_tsne_plot = function(counts_tibble, targets_or_controls) {
   pdf(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "tSNEPlot.pdf", sep = "_")), 
       width = 7, height = 7)
   print(tsne_plot)
-  dev.off()
+  invisible(dev.off())
   # Save as PNG
   png(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "tSNEPlot.png", sep = "_")), 
       width = 7, height = 7, units = "in", res = 300)
   print(tsne_plot)
-  dev.off()
+  invisible(dev.off())
 }
 
 # Targets
