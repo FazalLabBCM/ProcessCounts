@@ -53,7 +53,7 @@ control = "control"
 target_pattern = ".+-T[[:digit:]]$"
 control_pattern = ".+-C[[:digit:]]$"
 
-for (file in list.files(path = OUTPUTDIR, pattern = "^[^/_]+-[^/_]*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
+for (file in list.files(path = data_folder, pattern = "^[^/_]+-[^/_]*[[:digit:]]+C\\.txt", recursive = TRUE, full.names = TRUE)) {
   cat("Working with file ", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "C\\.txt")[1])
   abbreviation = str_sub(base_name, 
@@ -144,7 +144,7 @@ if (COMBINE_CONTROLS == "TRUE") {
 
 # Merge DESeq data into one data table
 cat("Merging all DESeq2 results", "\n")
-for (file in list.files(path = OUTPUTDIR, pattern = "[^/_]+-[^/_]*[[:digit:]]+C_DESeq2\\.txt", recursive = TRUE, full.names = TRUE)) {
+for (file in list.files(path = data_folder, pattern = "[^/_]+-[^/_]*[[:digit:]]+C_DESeq2\\.txt", recursive = TRUE, full.names = TRUE)) {
   cat("  merging file ", file, "\n")
   base_name = str_sub(file, end = str_locate(file, pattern = "C_DESeq2\\.txt")[1])
   
