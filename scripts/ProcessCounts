@@ -150,7 +150,7 @@ do
         "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
       else
         # Submit batch job
-        sbatch --job-name=ProcessCounts --output="${OUTPUTDIR}"%j.%x.log \
+        sbatch --job-name=ProcessCounts --output="${OUTPUTDIR}"/%j.%x.log \
         "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
       fi
       break

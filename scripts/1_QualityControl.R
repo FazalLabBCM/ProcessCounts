@@ -235,6 +235,7 @@ for (i in 1:length(locations_conditions)) {
   
   # Join location-condition targets with location-condition controls
   location_condition_targets = select(targets, matches(str_c(location_condition, "-T[[:digit:]]$")))
+  if (ncol(location_condition_targets) == 0) { next }
   if (COMBINE_CONTROLS == "TRUE") {
     location_condition_controls = controls
   } else {

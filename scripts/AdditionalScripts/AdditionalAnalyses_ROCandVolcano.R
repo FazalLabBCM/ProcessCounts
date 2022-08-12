@@ -87,10 +87,10 @@ volcano_plot = ggplot() +
 print(volcano_plot)
 
 # Save volcano plot
-pdf(file = paste(date, "/path/to/Figures/DATE_ProjectName_VolcanoPlot.pdf", sep = "_"), width = 7, height = 5)  # EDIT: file path and file name for output ROC curve
+pdf(file = "/path/to/Figures/DATE_ProjectName_VolcanoPlot.pdf", width = 7, height = 5)  # EDIT: file path and file name for output volcano plot
 print(volcano_plot)
 dev.off()
-png(file = paste(date, "/path/to/Figures/DATE_ProjectName_VolcanoPlot.png", sep = "_"), width = 7, height = 5, units = "in", res = 600)  # EDIT: file path and file name for output ROC curve
+png(file = "/path/to/Figures/DATE_ProjectName_VolcanoPlot.png", width = 7, height = 5, units = "in", res = 300)  # EDIT: file path and file name for output volcano plot
 print(volcano_plot)
 dev.off()
 
