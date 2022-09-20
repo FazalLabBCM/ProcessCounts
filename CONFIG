@@ -1,2 +1,2 @@
-ENVDIR=/storage/fazal/software/ProcessCounts/venv
+ENVDIR=/storage/fazal/software/pipelines/ProcessCounts/venv
 TEMPDIR=/storage/fazal/tmp
