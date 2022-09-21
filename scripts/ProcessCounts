@@ -4,7 +4,8 @@
 set -e
 unset PYTHONPATH
 unset R_LIBS_SITE
-
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 # SET DEFAULT ARGUMENTS
 SCRIPTDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)

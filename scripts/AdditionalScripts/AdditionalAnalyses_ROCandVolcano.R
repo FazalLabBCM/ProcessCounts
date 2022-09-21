@@ -4,6 +4,7 @@
 #### PREPARE ENVIRONMENT ####
 rm(list = ls())
 library(tidyverse)
+library(pROC)
 
 
 #### GET TRUE POSITIVE AND TRUE NEGATIVE GENES ####
@@ -24,7 +25,7 @@ htseq_counts = read_tsv(htseq_counts_file)
 roc_data = deseq_data %>%
   filter(Common_Gene %in% true_positive_genes | Common_Gene %in% true_negative_genes) %>%
   mutate("Actual" = ifelse(Common_Gene %in% true_positive_genes, 1, 0)) %>%
-  drop_na(Actual)
+  drop_na(Actual, `YourSample-FC`, `YourSample-P`)  # EDIT: the column names in your DESeq2 results table for the FC and P values to be used in your ROC curve
 
 # Calculate fit
 fit = glm(roc_data$Actual ~ roc_data$`YourSample-FC` + roc_data$`YourSample-P`,  # EDIT: the column names in your DESeq2 results table for the FC and P values to be used in your ROC curve 
