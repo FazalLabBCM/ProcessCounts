@@ -11,6 +11,7 @@ export LC_ALL=en_US.UTF-8
 SCRIPTDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 PIPELINEDIR=$(dirname "${SCRIPTDIR}")
 source "${PIPELINEDIR}"/CONFIG
+source "${SCRIPTDIR}"/AdditionalScripts/FORMATTING
 COMBINE_CONTROLS=FALSE
 
 
@@ -19,34 +20,34 @@ while [[ $# -gt 0 ]]
 do
   case "${1}" in
     -h|--help)
-      echo "_____________"
-      echo "ProcessCounts"
-      echo "‾‾‾‾‾‾‾‾‾‾‾‾‾"
-      echo "Process FASTQ read counts with DESeq2 (https://github.com/mikelove/DESeq2) to obtain "
+      echo "${YELLOW}_____________${END}"
+      echo "${YELLOW}ProcessCounts${END}"
+      echo "${YELLOW}‾‾‾‾‾‾‾‾‾‾‾‾‾${END}"
+      echo "Process FASTQ read counts with DESeq2 (${LINK}https://github.com/mikelove/DESeq2${END}) to obtain "
       echo "enrichment values and an analysis summary full of quality-control figures."
       echo ""
       echo "For help using the ProcessCounts pipeline, visit "
-      echo "https://fazallabbcm.github.io/FazalLabPipelines/."
+      echo "${LINK}https://fazallabbcm.github.io/FazalLabPipelines/${END}."
       echo ""
       echo "____________________________________________________________________________________________"
-      echo "Usage:"
-      echo "  ProcessCounts --option <argument>"
+      echo "${BOLD}USAGE${END}"
+      echo "  ProcessCounts ${BOLD}--option${END} <${UL}argument${END}>"
       echo ""
-      echo "Options:"
-      echo "  -h, --help                show this help message"
+      echo "${BOLD}OPTIONS${END}"
+      echo "  ${BOLD}-h${END}, ${BOLD}--help${END}                show this help message"
       echo ""
-      echo "  -d, --data-dir DIR        path to directory containing processed data files"
+      echo "  ${BOLD}-d${END}, ${BOLD}--data-dir${END} ${UL}DIR${END}        path to directory containing processed data files"
       echo ""
-      echo "  -o, --output-dir DIR      path to directory for output tables and figures"
+      echo "  ${BOLD}-o${END}, ${BOLD}--output-dir${END} ${UL}DIR${END}      path to directory for output tables and figures"
       echo "                            (default is your current directory)"
       echo ""
-      echo "  -n, --name NAME           name of project to be added to file names of tables and figures"
+      echo "  ${BOLD}-n${END}, ${BOLD}--name${END} ${UL}NAME${END}           name of project to be added to file names of tables and figures"
       echo "                            (default is ProjectName)"
       echo ""
-      echo "  -c, --combine-controls    if control samples for each experimental condition are the same,"
+      echo "  ${BOLD}-c${END}, ${BOLD}--combine-controls${END}    if control samples for each experimental condition are the same,"
       echo "                            they can be combined for improved analysis and figures"
       echo ""
-      echo "  -i, --interactive         run the pipeline interactively instead of submitting a batch job"
+      echo "  ${BOLD}-i${END}, ${BOLD}--interactive${END}         run the pipeline interactively instead of submitting a batch job"
       echo "                            (make sure to switch to an interactive node)"
       echo "‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾"
       exit 0
