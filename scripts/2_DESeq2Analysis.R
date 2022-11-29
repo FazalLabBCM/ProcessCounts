@@ -207,16 +207,16 @@ create_cor_plot = function(cor_mat, targets_or_controls, colors) {
            method="circle", 
            order = "hclust", 
            col.lim = c(0, 1), 
+           is.corr = FALSE,
            tl.cex = ifelse(text_label_size < 1, text_label_size, 1),
            tl.col = "black", 
            hclust.method = "centroid", 
            addrect = num_squares, 
-           col = colors(40))}
+           col = colors(150))}
 
 create_and_save_cor_plot = function(cor_mat, targets_or_controls) {
-  colors = colorRampPalette(c("#7F0000", "red", "#FF7F00", "yellow", "#7FFF7F", "cyan", "#007FFF", 
-                               "blue", "#00007F","#67001F", "#B2182B", "#D6604D", "#F4A582", "#FDDBC7", 
-                               "#FFFFFF", "#D1E5F0", "#92C5DE", "#4393C3", "#2166AC", "#053061"))
+  colors = colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582", "#FDDBC7", 
+                              "#FFFFFF", "#D1E5F0", "#92C5DE", "#4393C3", "#2166AC", "#053061"))
   # Save as PDF
   pdf(file = paste0(figures_folder, paste(date, PROJECT_NAME, targets_or_controls, "PearsonCorrelationPlot.pdf", sep = "_")), 
       width = 7, height = 7)
