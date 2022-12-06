@@ -75,6 +75,11 @@ do
       INTERACTIVE=TRUE
       shift
       ;;
+    -l|--min-transcript-length)
+      MIN_TRANSCRIPT_LENGTH="${2}"
+      shift
+      shift
+      ;;
     -e|--env-dir)
       ENVDIR="${2}"
       shift
@@ -128,6 +133,7 @@ echo "  Processed data directory:  ${DATADIR}"
 echo "  Output directory:          ${OUTPUTDIR}"
 echo "  Project name:              ${PROJECT_NAME}"
 echo "  Combine controls:          ${COMBINE_CONTROLS}"
+#echo "  Minimum transcript length: ${MIN_TRANSCRIPT_LENGTH}"
 #echo "  Environment directory:     ${ENVDIR}"
 #echo "  Temporary directory:       ${TEMPDIR}"
 echo ""
@@ -149,11 +155,11 @@ do
       if [[ "${INTERACTIVE}" == TRUE ]]
       then
         # Run pipeline interactively
-        "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
+        "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}" "${MIN_TRANSCRIPT_LENGTH}"
       else
         # Submit batch job
         sbatch --job-name=ProcessCounts --output="${OUTPUTDIR}"/%j.%x.log \
-        "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}"
+        "${SCRIPTDIR}"/ProcessCounts.sh "${SCRIPTDIR}" "${DATADIR}" "${OUTPUTDIR}" "${PROJECT_NAME}" "${COMBINE_CONTROLS}" "${MIN_TRANSCRIPT_LENGTH}"
       fi
       break
       ;;
