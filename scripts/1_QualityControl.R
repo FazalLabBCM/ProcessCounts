@@ -14,12 +14,14 @@ if (interactive()) {
   OUTPUTDIR = "."
   PROJECT_NAME = "test"
   COMBINE_CONTROLS = "FALSE"
+  MIN_TRANSCRIPT_LENGTH = 100
 } else {
   SCRIPTDIR = args[1]
   DATADIR = args[2]
   OUTPUTDIR = args[3]
   PROJECT_NAME = args[4]
   COMBINE_CONTROLS = args[5]
+  MIN_TRANSCRIPT_LENGTH = args[6]
 }
 
 # Import libraries
@@ -300,10 +302,19 @@ generate_correlation_plots = function(data, color) {
     }
   }
 }
+
+# Filter by transcript length
+transcripts = read_tsv(lengths_file)
+targets_filtered = targets %>%
+  filter(transcripts$Transcript_Length >= MIN_TRANSCRIPT_LENGTH)
+controls_filtered = controls %>%
+  filter(transcripts$Transcript_Length >= MIN_TRANSCRIPT_LENGTH)
+
+# Create correlation plots
 cat("Creating correlation plots for targets", "\n")
-suppressWarnings(generate_correlation_plots(targets, "red4"))
+suppressWarnings(generate_correlation_plots(targets_filtered, "red4"))
 cat("Creating correlation plots for controls", "\n")
-suppressWarnings(generate_correlation_plots(controls, "dodgerblue4"))
+suppressWarnings(generate_correlation_plots(controls_filtered, "dodgerblue4"))
 
 
 #### CLEAR ENVIRONMENT ####

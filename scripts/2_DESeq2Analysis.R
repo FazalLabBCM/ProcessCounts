@@ -13,11 +13,13 @@ if (interactive()) {
   OUTPUTDIR = "."
   PROJECT_NAME = "test"
   COMBINE_CONTROLS = "FALSE"
+  MIN_TRANSCRIPT_LENGTH = 100
 } else {
   SCRIPTDIR = args[1]
   OUTPUTDIR = args[2]
   PROJECT_NAME = args[3]
   COMBINE_CONTROLS = args[4]
+  MIN_TRANSCRIPT_LENGTH = args[5]
 }
 
 # Import libraries
@@ -139,6 +141,13 @@ if (COMBINE_CONTROLS == "TRUE") {
     pull(name)
 }
 
+# Filter by transcript length
+transcripts = read_tsv(lengths_file)
+targets_counts_filtered = targets_counts %>%
+  filter(transcripts$Transcript_Length >= MIN_TRANSCRIPT_LENGTH)
+controls_counts_filtered = controls_counts %>%
+  filter(transcripts$Transcript_Length >= MIN_TRANSCRIPT_LENGTH)
+
 
 #### MERGE AND SAVE ALL RESULTS ####
 
@@ -231,17 +240,17 @@ create_and_save_cor_plot = function(cor_mat, targets_or_controls) {
 
 # Targets
 cat("Creating Pearson correlation plot for targets", "\n")
-targets_cor_mat = prepare_cor_mat(targets_counts, targets_sizeFactors)
+targets_cor_mat = prepare_cor_mat(targets_counts_filtered, targets_sizeFactors)
 create_and_save_cor_plot(targets_cor_mat, "Targets")
 # Controls
 cat("Creating Pearson correlation plot for controls", "\n")
-controls_cor_mat = prepare_cor_mat(controls_counts, controls_sizeFactors)
+controls_cor_mat = prepare_cor_mat(controls_counts_filtered, controls_sizeFactors)
 create_and_save_cor_plot(controls_cor_mat, "Controls")
 # Targets and controls
 cat("Creating Pearson correlation plot for targets and controls", "\n")
-targets_and_controls_counts = cbind(targets_counts, controls_counts)
+targets_and_controls_counts_filtered = cbind(targets_counts_filtered, controls_counts_filtered)
 targets_and_controls_sizeFactors = c(targets_sizeFactors, controls_sizeFactors)
-targets_and_controls_cor_mat = prepare_cor_mat(targets_and_controls_counts, targets_and_controls_sizeFactors)
+targets_and_controls_cor_mat = prepare_cor_mat(targets_and_controls_counts_filtered, targets_and_controls_sizeFactors)
 create_and_save_cor_plot(targets_and_controls_cor_mat, "TargetsAndControls")
 
 
@@ -296,13 +305,13 @@ create_and_save_tsne_plot = function(counts_tibble, targets_or_controls) {
 
 # Targets
 cat("Creating tSNE plot for targets", "\n")
-create_and_save_tsne_plot(targets_counts, "Targets")
+create_and_save_tsne_plot(targets_counts_filtered, "Targets")
 # Controls
 cat("Creating tSNE plot for controls", "\n")
-create_and_save_tsne_plot(controls_counts, "Controls")
+create_and_save_tsne_plot(controls_counts_filtered, "Controls")
 # Targets and controls
 cat("Creating tSNE plot for targets and controls", "\n")
-create_and_save_tsne_plot(targets_and_controls_counts, "TargetsAndControls")
+create_and_save_tsne_plot(targets_and_controls_counts_filtered, "TargetsAndControls")
 
 
 #### CLEAR ENVIRONMENT ####
